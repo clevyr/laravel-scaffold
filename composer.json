@@ -1,0 +1,24 @@
+{
+    "name": "clevyr/laravel-scaffold",
+    "description": "Scaffold out common pieces of laravel projects",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Garrett Cox",
+            "email": "garrettjcox@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Clevyr\\LaravelScaffold\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Clevyr\\LaravelScaffold\\ServiceProvider"
+            ]
+        }
+    }
+}
