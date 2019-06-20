@@ -15,7 +15,6 @@ class MakeAuthVueCommand extends Command
      * @var string
      */
     protected $signature = 'make:auth-vue
-                    {--views : Only scaffold the authentication views}
                     {--force : Overwrite existing views by default}';
 
     /**
@@ -23,22 +22,7 @@ class MakeAuthVueCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Scaffold basic login and registration views and routes';
-
-    /**
-     * The views that need to be exported.
-     *
-     * @var array
-     */
-    protected $views = [
-        'auth/login.stub' => 'auth/login.blade.php',
-        'auth/register.stub' => 'auth/register.blade.php',
-        'auth/verify.stub' => 'auth/verify.blade.php',
-        'auth/passwords/email.stub' => 'auth/passwords/email.blade.php',
-        'auth/passwords/reset.stub' => 'auth/passwords/reset.blade.php',
-        'layouts/app.stub' => 'layouts/app.blade.php',
-        'home.stub' => 'home.blade.php',
-    ];
+    protected $description = 'Scaffold basic login and registration with Vue';
 
     /**
      * Execute the console command.
@@ -47,40 +31,41 @@ class MakeAuthVueCommand extends Command
      */
     public function handle()
     {
-        $this->createDirectories();
+        $this->exportControllers();
+        $this->exportRoutes();
+        $this->exportResources();
 
-        $this->exportViews();
-
-        if (! $this->option('views')) {
-            file_put_contents(
-                app_path('Http/Controllers/HomeController.php'),
-                $this->compileControllerStub()
-            );
-
-            file_put_contents(
-                base_path('routes/web.php'),
-                file_get_contents(__DIR__.'/stubs/make/routes.stub'),
-                FILE_APPEND
-            );
-        }
-
-        $this->info('Authentication scaffolding generated successfully.');
+        $this->info('Vue Auth scaffolding generated successfully.');
     }
 
     /**
-     * Create the directories for the files.
+     * Export the controllers
      *
      * @return void
      */
-    protected function createDirectories()
+    protected function exportControllers()
     {
-        if (! is_dir($directory = $this->getViewPath('layouts'))) {
-            mkdir($directory, 0755, true);
-        }
+        $this->recursivelyCopy(
+            __DIR__.'/stubs/MakeAuthVueStubs/controllers',
+            app_path('Http/Controllers'),
+            function ($contents) {
+                return str_replace('{{namespace}}', $this->getAppNamespace(), $contents);
+            }
+        );
+    }
 
-        if (! is_dir($directory = $this->getViewPath('auth/passwords'))) {
-            mkdir($directory, 0755, true);
-        }
+    /**
+     * Export the controllers
+     *
+     * @return void
+     */
+    protected function exportRoutes()
+    {
+        file_put_contents(
+            base_path('routes/web.php'),
+            file_get_contents(__DIR__.'/stubs/MakeAuthVueStubs/routes.php'),
+            FILE_APPEND
+        );
     }
 
     /**
@@ -88,46 +73,39 @@ class MakeAuthVueCommand extends Command
      *
      * @return void
      */
-    protected function exportViews()
+    protected function exportResources()
     {
-        foreach ($this->views as $key => $value) {
-            if (file_exists($view = $this->getViewPath($value)) && ! $this->option('force')) {
-                if (! $this->confirm("The [{$value}] view already exists. Do you want to replace it?")) {
-                    continue;
-                }
-            }
-
-            copy(
-                __DIR__.'/stubs/make/views/'.$key,
-                $view
-            );
-        }
-    }
-
-    /**
-     * Compiles the HomeController stub.
-     *
-     * @return string
-     */
-    protected function compileControllerStub()
-    {
-        return str_replace(
-            '{{namespace}}',
-            $this->getAppNamespace(),
-            file_get_contents(__DIR__.'/stubs/make/controllers/HomeController.stub')
+        $this->recursivelyCopy(
+            __DIR__.'/stubs/MakeAuthVueStubs/resources',
+            base_path('resources')
         );
     }
 
-    /**
-     * Get full view path relative to the app's configured view path.
-     *
-     * @param  string  $path
-     * @return string
-     */
-    protected function getViewPath($path)
+    private function recursivelyCopy($src, $dest, $compiler = null)
     {
-        return implode(DIRECTORY_SEPARATOR, [
-            config('view.paths')[0] ?? resource_path('views'), $path,
-        ]);
+        if (!$compiler) {
+            $compiler = function ($contents) {
+                return $contents;
+            };
+        }
+
+        foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($src)) as $file) {
+            $destPath = str_replace($src, $dest, $file->getPathname());
+            if ($file->isDir()) {
+                if (! is_dir($destPath)) {
+                    mkdir($destPath, 0755, true);
+                }
+            } else {
+                if (file_exists($destPath) && ! $this->option('force')) {
+                    if (! $this->confirm("The file [{$destPath}] already exists. Do you want to replace it?")) {
+                        continue;
+                    }
+                }
+                file_put_contents(
+                    $dest.str_replace($src, '', $file),
+                    $compiler(file_get_contents($file))
+                );
+            }
+        }
     }
 }
