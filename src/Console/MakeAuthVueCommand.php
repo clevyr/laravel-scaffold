@@ -47,8 +47,8 @@ class MakeAuthVueCommand extends Command
     protected function exportControllers()
     {
         $this->recursivelyCopy(
-            __DIR__.'/stubs/MakeAuthVueStubs/controllers',
-            app_path('Http/Controllers'),
+            __DIR__.'/stubs/MakeAuthVueStubs/app',
+            app_path(),
             function ($contents) {
                 return str_replace('{{namespace}}', $this->getAppNamespace(), $contents);
             }
