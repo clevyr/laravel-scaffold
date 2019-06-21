@@ -11,7 +11,7 @@ export default defaultsDeep({
             commit('setRequestState', STATE_IN_PROGRESS);
 
             try {
-                const response = await axios.post('/login', formData);
+                const response = await axios.post('/api/login', formData);
 
                 commit('setRequestState', STATE_SUCCESS);
                 commit('setData', response.data);

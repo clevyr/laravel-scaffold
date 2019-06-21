@@ -11,7 +11,7 @@ export default defaultsDeep({
             commit('setRequestState', STATE_IN_PROGRESS);
 
             try {
-                const response = await axios.post('/logout', formData);
+                const response = await axios.post('/api/logout', formData);
 
                 commit('setRequestState', STATE_SUCCESS);
                 commit('setData', response.data);

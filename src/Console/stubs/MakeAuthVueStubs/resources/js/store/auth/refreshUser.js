@@ -11,7 +11,7 @@ export default defaultsDeep({
             commit('setRequestState', STATE_IN_PROGRESS);
 
             try {
-                const response = await axios.get('/api/user');
+                const response = await axios.get('/api/me');
 
                 commit('setRequestState', STATE_SUCCESS);
                 commit('setData', response.data);

@@ -62,10 +62,9 @@ class MakeAuthVueCommand extends Command
      */
     protected function exportRoutes()
     {
-        file_put_contents(
-            base_path('routes/web.php'),
-            file_get_contents(__DIR__.'/stubs/MakeAuthVueStubs/routes/web.php'),
-            FILE_APPEND
+        $this->recursivelyCopy(
+            __DIR__.'/stubs/MakeAuthVueStubs/routes',
+            base_path('routes')
         );
     }
 
@@ -89,7 +88,7 @@ class MakeAuthVueCommand extends Command
      */
     protected function installDeps()
     {
-        // NPM install vuex, bootstrap-vue, and vue-router
+        exec('npm install --save-dev vuex bootstrap-vue vue-router');
     }
 
     private function recursivelyCopy($src, $dest, $compiler = null)
