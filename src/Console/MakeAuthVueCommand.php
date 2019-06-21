@@ -31,54 +31,20 @@ class MakeAuthVueCommand extends Command
      */
     public function handle()
     {
-        $this->exportControllers();
-        $this->exportRoutes();
-        $this->exportResources();
+        $this->recursivelyCopy(
+            __DIR__.'/stubs/MakeAuthVueStubs',
+            base_path(),
+            function ($srcPath, $destPath) {
+                file_put_contents(
+                    $destPath,
+                    str_replace('{{namespace}}', $this->getAppNamespace(), file_get_contents($srcPath))
+                );
+            }
+        );
+
         $this->installDeps();
 
         $this->info('Vue Auth scaffolding generated successfully.');
-    }
-
-    /**
-     * Export the controllers
-     *
-     * @return void
-     */
-    protected function exportControllers()
-    {
-        $this->recursivelyCopy(
-            __DIR__.'/stubs/MakeAuthVueStubs/app',
-            app_path(),
-            function ($contents) {
-                return str_replace('{{namespace}}', $this->getAppNamespace(), $contents);
-            }
-        );
-    }
-
-    /**
-     * Export the controllers
-     *
-     * @return void
-     */
-    protected function exportRoutes()
-    {
-        $this->recursivelyCopy(
-            __DIR__.'/stubs/MakeAuthVueStubs/routes',
-            base_path('routes')
-        );
-    }
-
-    /**
-     * Export the authentication views.
-     *
-     * @return void
-     */
-    protected function exportResources()
-    {
-        $this->recursivelyCopy(
-            __DIR__.'/stubs/MakeAuthVueStubs/resources',
-            base_path('resources')
-        );
     }
 
     /**
@@ -91,16 +57,20 @@ class MakeAuthVueCommand extends Command
         exec('npm install --save-dev vuex bootstrap-vue vue-router');
     }
 
-    private function recursivelyCopy($src, $dest, $compiler = null)
+    private function recursivelyCopy($src, $dest, $copyMethod = null)
     {
-        if (!$compiler) {
-            $compiler = function ($contents) {
-                return $contents;
+        if (!$copyMethod) {
+            $copyMethod = function ($srcPath, $destPath) {
+                file_put_contents(
+                    $destPath,
+                    file_get_contents($srcPath)
+                );
             };
         }
 
         foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($src)) as $file) {
-            $destPath = str_replace($src, $dest, $file->getPathname());
+            $srcPath = $file->getPathname();
+            $destPath = str_replace($src, $dest, $srcPath);
             if ($file->isDir()) {
                 if (! is_dir($destPath)) {
                     mkdir($destPath, 0755, true);
@@ -111,10 +81,7 @@ class MakeAuthVueCommand extends Command
                         continue;
                     }
                 }
-                file_put_contents(
-                    $dest.str_replace($src, '', $file),
-                    $compiler(file_get_contents($file))
-                );
+                $copyMethod($srcPath, $destPath);
             }
         }
     }

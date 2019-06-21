@@ -31,34 +31,28 @@ class MakeDockerCommand extends Command
      */
     public function handle()
     {
-        $this->exportFiles();
-
-        $this->info('Docker setup generated successfully.');
-    }
-
-    /**
-     * Export the files
-     *
-     * @return void
-     */
-    protected function exportFiles()
-    {
         $this->recursivelyCopy(
             __DIR__.'/stubs/MakeDockerStubs',
             base_path()
         );
+
+        $this->info('Docker setup generated successfully.');
     }
 
-    private function recursivelyCopy($src, $dest, $compiler = null)
+    private function recursivelyCopy($src, $dest, $copyMethod = null)
     {
-        if (!$compiler) {
-            $compiler = function ($contents) {
-                return $contents;
+        if (!$copyMethod) {
+            $copyMethod = function ($srcPath, $destPath) {
+                file_put_contents(
+                    $destPath,
+                    file_get_contents($srcPath)
+                );
             };
         }
 
         foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($src)) as $file) {
-            $destPath = str_replace($src, $dest, $file->getPathname());
+            $srcPath = $file->getPathname();
+            $destPath = str_replace($src, $dest, $srcPath);
             if ($file->isDir()) {
                 if (! is_dir($destPath)) {
                     mkdir($destPath, 0755, true);
@@ -69,10 +63,7 @@ class MakeDockerCommand extends Command
                         continue;
                     }
                 }
-                file_put_contents(
-                    $dest.str_replace($src, '', $file),
-                    $compiler(file_get_contents($file))
-                );
+                $copyMethod($srcPath, $destPath);
             }
         }
     }
