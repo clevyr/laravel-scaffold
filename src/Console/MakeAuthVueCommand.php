@@ -34,6 +34,7 @@ class MakeAuthVueCommand extends Command
         $this->exportControllers();
         $this->exportRoutes();
         $this->exportResources();
+        $this->installDeps();
 
         $this->info('Vue Auth scaffolding generated successfully.');
     }
@@ -63,7 +64,7 @@ class MakeAuthVueCommand extends Command
     {
         file_put_contents(
             base_path('routes/web.php'),
-            file_get_contents(__DIR__.'/stubs/MakeAuthVueStubs/routes.php'),
+            file_get_contents(__DIR__.'/stubs/MakeAuthVueStubs/routes/web.php'),
             FILE_APPEND
         );
     }
@@ -79,6 +80,16 @@ class MakeAuthVueCommand extends Command
             __DIR__.'/stubs/MakeAuthVueStubs/resources',
             base_path('resources')
         );
+    }
+
+    /**
+     * Install npm dependencies
+     *
+     * @return void
+     */
+    protected function installDeps()
+    {
+        // NPM install vuex, bootstrap-vue, and vue-router
     }
 
     private function recursivelyCopy($src, $dest, $compiler = null)
