@@ -1,0 +1,16 @@
+.circleci/
+.dockerignore
+.editorconfig
+.env.example
+.eslintrc.json
+.git
+.gitattributes
+.gitignore
+README.md
+docker-compose.yml
+node_modules/
+phpcs.xml
+phpdocker/
+phpunit.xml
+tests/
+vendor/

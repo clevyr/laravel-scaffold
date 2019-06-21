@@ -1,0 +1,52 @@
+version: "2.4"
+
+services:
+  # app:
+  #   build: docker/app
+  #   container_name: "${APP_SLUG:-laravel}-app"
+  #   image: clevyr/laravel
+  #   volumes:
+  #     - .:/app
+  #   working_dir: /app
+  #
+  # web:
+  #   build: docker/nginx
+  #   container_name: "${APP_SLUG:-laravel}-web"
+  #   image: clevyr/nginx
+  #   links:
+  #     - app
+  #   ports:
+  #     - 127.0.0.1:8000:80
+  #   volumes:
+  #     - .:/app
+  #   working_dir: /app
+  queue:
+    build: docker/app
+    command: php artisan queue:work --queue=high,default --tries=3
+    container_name: "${APP_SLUG:-laravel}-queue"
+    environment:
+      DB_HOST: "database"
+    image: clevyr/laravel
+    volumes:
+      - .:/app
+    working_dir: /app
+
+  database:
+    container_name: "${APP_SLUG:-laravel}-database"
+    environment:
+      POSTGRES_USER: "${DB_USERNAME}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "$DB_DATABASE"
+    image: postgres:11.1-alpine
+    ports:
+      - 127.0.0.1:5432:5432
+    working_dir: /app
+
+  test_database:
+    container_name: "${APP_SLUG:-laravel}-testing-database"
+    environment:
+      POSTGRES_USER: "${DB_USERNAME}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "$DB_DATABASE"
+    image: postgres:11.1-alpine
+    working_dir: /app

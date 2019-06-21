@@ -4,6 +4,7 @@ namespace Clevyr\LaravelScaffold;
 
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Clevyr\LaravelScaffold\Console\MakeAuthVueCommand;
+use Clevyr\LaravelScaffold\Console\MakeDockerCommand;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -17,6 +18,7 @@ class ServiceProvider extends BaseServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 MakeAuthVueCommand::class,
+                MakeDockerCommand::class,
             ]);
         }
     }
