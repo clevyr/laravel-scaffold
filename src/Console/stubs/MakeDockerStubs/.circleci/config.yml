@@ -12,9 +12,6 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Add Nova Auth Config
-          command: echo "$NOVA_AUTH_JSON" > auth.json
-      - run:
           name: Build App
           command: docker build -t 396720968759.dkr.ecr.us-east-2.amazonaws.com/$APP_NAME/app -f docker/app/Dockerfile.prod .
       - run:
