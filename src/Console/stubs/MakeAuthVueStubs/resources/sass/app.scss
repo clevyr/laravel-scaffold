@@ -1,0 +1,40 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+@import '~bootstrap-vue/src/index.scss';
+@import '~sass-material-colors/sass/sass-material-colors';
+
+html, body, #app {
+    max-height: 100vh;
+    min-height: 100vh;
+    max-width: 100vw;
+    min-width: 100vw;
+    overflow: hidden;
+}
+
+.navbar {
+    // background-color: #fff;
+}
+
+.overflow-scroll {
+    overflow: scroll;
+}
+
+.btn-primary:hover {
+    background-color: $primary;
+    border-color: $primary;
+}
+
+.btn-success:hover {
+    background-color: $success;
+    border-color: $success;
+}
+
+.btn:hover {
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,.15);
+}

@@ -21,5 +21,5 @@ export default defaultsDeep({
                 commit('setError', error.response.data);
             }
         },
-    }
+    },
 }, baseRequestStore);

@@ -54,7 +54,7 @@ class MakeAuthVueCommand extends Command
      */
     protected function installDeps()
     {
-        exec('npm install --save-dev vuex bootstrap-vue vue-router');
+        exec('npm install --save-dev vuex bootstrap-vue vue-router sass-material-colors vuelidate');
     }
 
     private function recursivelyCopy($src, $dest, $copyMethod = null)

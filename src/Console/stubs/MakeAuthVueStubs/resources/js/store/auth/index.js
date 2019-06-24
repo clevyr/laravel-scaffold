@@ -1,6 +1,7 @@
-import login from './login';
 import register from './register';
+import login from './login';
 import logout from './logout';
+import passwords from './passwords';
 import refreshUser from './refreshUser';
 
 const isAuth = !!document.head.querySelector('meta[name="is-auth"]');
@@ -9,14 +10,15 @@ export default {
     namespaced: true,
 
     modules: {
-        login,
         register,
+        login,
         logout,
+        passwords,
         refreshUser,
     },
 
     state: {
-        isAuth: isAuth,
+        isAuth,
         user: null,
     },
 
@@ -29,6 +31,6 @@ export default {
         clearUser(state) {
             state.isAuth = false;
             state.user = null;
-        }
+        },
     },
-}
+};

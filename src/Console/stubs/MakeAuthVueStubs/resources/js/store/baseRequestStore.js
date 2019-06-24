@@ -1,4 +1,8 @@
-import { STATE_PRE } from '../constants/requestStates';
+import _ from 'lodash';
+
+import {
+    STATE_PRE, STATE_FAIL, STATE_SUCCESS, STATE_IN_PROGRESS,
+} from '../constants/requestStates';
 
 export default {
     namespaced: true,
@@ -22,6 +26,12 @@ export default {
             state.error = error;
         },
 
+        clearValidationError(state, field) {
+            if (state.error && state.error.errors) {
+                delete state.error.errors[field];
+            }
+        },
+
         reset(state) {
             state.requestState = STATE_PRE;
             state.data = null;
@@ -30,9 +40,11 @@ export default {
     },
 
     getters: {
-        validationError: (state) => (prop) => {
-            return state.error && state.error.errors && state.error.errors[prop] && state.error.errors[prop][0];
-        }
+        getValidationError: state => field => _.get(state, `error.errors.${field}[0]`),
+        hasValidationError: state => field => _.has(state, `error.errors.${field}[0]`),
+        successful: state => state.requestState === STATE_SUCCESS,
+        failed: state => state.requestState === STATE_FAIL,
+        inProgress: state => state.requestState === STATE_IN_PROGRESS,
     },
 
     actions: {
@@ -44,5 +56,5 @@ export default {
 
             throw notOverwrittenError;
         },
-    }
-}
+    },
+};

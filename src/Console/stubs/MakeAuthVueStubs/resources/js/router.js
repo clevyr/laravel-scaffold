@@ -2,11 +2,14 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 
 import store from './store';
-import NotFound from './views/NotFound';
-import Welcome from './views/Welcome';
-import Login from './views/auth/Login';
-import Register from './views/auth/Register';
-import Home from './views/Home';
+import NotFound from './views/NotFound.vue';
+import Welcome from './views/Welcome.vue';
+import Home from './views/Home.vue';
+import Register from './views/auth/Register.vue';
+import Login from './views/auth/Login.vue';
+import Verify from './views/auth/Verify.vue';
+import PasswordEmail from './views/auth/passwords/Email.vue';
+import PasswordReset from './views/auth/passwords/Reset.vue';
 
 Vue.use(VueRouter);
 
@@ -18,19 +21,20 @@ const router = new VueRouter({
     routes: [
         {
             path: '*',
-            component: NotFound
+            component: NotFound,
         },
 
         {
             path: '/',
-            component: Welcome
+            component: Welcome,
         },
 
         {
-            path: '/login',
-            component: Login,
+            path: '/home',
+            component: Home,
             meta: {
-                guest: true,
+                auth: true,
+                verified: true,
             },
         },
 
@@ -38,18 +42,45 @@ const router = new VueRouter({
             path: '/register',
             component: Register,
             meta: {
-                guest: true,
+                hideNavbar: true,
+                notAuth: true,
             },
         },
 
         {
-            path: '/home',
-            component: Home,
+            path: '/login',
+            component: Login,
             meta: {
-                requiresAuth: true,
+                hideNavbar: true,
+                notAuth: true,
             },
         },
-    ]
+
+        {
+            path: '/email/resend',
+            component: Verify,
+            meta: {
+                auth: true,
+                notVerified: true,
+            },
+        },
+
+        {
+            path: '/password/email',
+            component: PasswordEmail,
+            meta: {
+                notAuth: true,
+            },
+        },
+
+        {
+            path: '/password/reset/:token',
+            component: PasswordReset,
+            meta: {
+                notAuth: true,
+            },
+        },
+    ],
 });
 
 router.beforeEach(async (to, from, next) => {
@@ -57,25 +88,25 @@ router.beforeEach(async (to, from, next) => {
         await store.dispatch('auth/refreshUser/sendRequest');
     }
 
-    if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (to.matched.some(record => record.meta.auth)) {
         if (!store.state.auth.isAuth) {
             return next({
                 path: '/login',
-                query: { redirect: to.fullPath }
+                query: { redirect: to.fullPath },
             });
         }
-    } else if (to.matched.some(record => record.meta.guest)) {
+    } else if (to.matched.some(record => record.meta.notAuth)) {
         if (store.state.auth.isAuth) {
             return next({ path: '/home' });
         }
     }
 
     if (to.matched.some(record => record.meta.notVerified)) {
-        if (!!store.state.auth.user.verifiedAt) {
-            return next({ path: '/home' });
+        if (store.state.auth.user.email_verified_at) {
+            return next({ path: '/' });
         }
     } else if (to.matched.some(record => record.meta.verified)) {
-        if (!store.state.auth.user.verifiedAt) {
+        if (!store.state.auth.user.email_verified_at) {
             return next({ path: '/email/resend' });
         }
     }
