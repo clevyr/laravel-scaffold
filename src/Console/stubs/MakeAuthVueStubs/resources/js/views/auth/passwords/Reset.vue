@@ -57,24 +57,24 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password_confirmation">Password Confirmation</label>
+                    <label for="passwordConfirmation">Password Confirmation</label>
 
                     <div>
                         <b-form-input
-                            id="password_confirmation"
+                            id="passwordConfirmation"
                             type="password"
                             class="form-control form-control-lg"
-                            :state="inputState('password_confirmation')"
-                            name="password_confirmation"
-                            v-model.trim="$v.form.password_confirmation.$model"
-                            autocomplete="password_confirmation"
+                            :state="inputState('passwordConfirmation')"
+                            name="passwordConfirmation"
+                            v-model.trim="$v.form.passwordConfirmation.$model"
+                            autocomplete="passwordConfirmation"
                             required
                             placeholder="Enter the same as above"
                         />
                         <span class="invalid-feedback" role="alert">
-                            <p class="mb-0" v-if="!$v.form.password_confirmation.noValidationError"> {{ getValidationError('password_confirmation') }} </p>
-                            <p class="mb-0" v-if="!$v.form.password_confirmation.required">Password confirmation is required</p>
-                            <p class="mb-0" v-if="!$v.form.password_confirmation.sameAs">Password confirmation must match the password above</p>
+                            <p class="mb-0" v-if="!$v.form.passwordConfirmation.noValidationError"> {{ getValidationError('passwordConfirmation') }} </p>
+                            <p class="mb-0" v-if="!$v.form.passwordConfirmation.required">Password confirmation is required</p>
+                            <p class="mb-0" v-if="!$v.form.passwordConfirmation.sameAs">Password confirmation must match the password above</p>
                         </span>
                     </div>
                 </div>
@@ -114,7 +114,7 @@ export default {
             form: {
                 email: this.$route.query.email || '',
                 password: '',
-                password_confirmation: '',
+                passwordConfirmation: '',
             },
         };
     },
@@ -132,10 +132,10 @@ export default {
                     required,
                     noServerError: () => !this.hasValidationError('password'),
                 },
-                password_confirmation: {
+                passwordConfirmation: {
                     sameAs: sameAs('password'),
                     required,
-                    noServerError: () => !this.hasValidationError('password_confirmation'),
+                    noServerError: () => !this.hasValidationError('passwordConfirmation'),
                 },
             }
         };

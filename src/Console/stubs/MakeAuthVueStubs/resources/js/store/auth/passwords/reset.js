@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { defaultsDeep } from 'lodash';
+import { camelize, decamelize } from '@ridi/object-case-converter';
 
 import baseRequestStore from '../../baseRequestStore';
 import { STATE_IN_PROGRESS, STATE_SUCCESS, STATE_FAIL } from '../../../constants/requestStates';
@@ -11,13 +12,13 @@ export default defaultsDeep({
             commit('setRequestState', STATE_IN_PROGRESS);
 
             try {
-                const response = await axios.post('/api/password/reset', formData);
+                const response = await axios.post('/api/password/reset', decamelize(formData));
 
                 commit('setRequestState', STATE_SUCCESS);
-                commit('setData', response.data);
+                commit('setData', camelize(response.data));
             } catch (error) {
                 commit('setRequestState', STATE_FAIL);
-                commit('setError', error.response.data);
+                commit('setError', camelize(error.response.data));
             }
         },
     },

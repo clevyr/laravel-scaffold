@@ -102,11 +102,11 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (to.matched.some(record => record.meta.notVerified)) {
-        if (store.state.auth.user.email_verified_at) {
+        if (store.state.auth.user.emailVerifiedAt) {
             return next({ path: '/' });
         }
     } else if (to.matched.some(record => record.meta.verified)) {
-        if (!store.state.auth.user.email_verified_at) {
+        if (!store.state.auth.user.emailVerifiedAt) {
             return next({ path: '/email/resend' });
         }
     }
