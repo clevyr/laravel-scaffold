@@ -137,10 +137,10 @@ export default {
     data() {
         return {
             form: {
-                name: 'Garrett',
-                email: 'garrettjcox@gmail.com',
-                password: 'password',
-                password_confirmation: 'password',
+                name: '',
+                email: '',
+                password: '',
+                password_confirmation: '',
             },
         };
     },

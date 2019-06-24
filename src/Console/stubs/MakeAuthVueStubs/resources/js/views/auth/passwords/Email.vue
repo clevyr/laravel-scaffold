@@ -66,7 +66,7 @@ export default {
     data() {
         return {
             form: {
-                email: 'garrettjcox@gmail.com',
+                email: '',
             },
         };
     },

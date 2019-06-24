@@ -96,8 +96,8 @@ export default {
     data() {
         return {
             form: {
-                email: 'garrettjcox@gmail.com',
-                password: 'password',
+                email: '',
+                password: '',
             },
         };
     },
