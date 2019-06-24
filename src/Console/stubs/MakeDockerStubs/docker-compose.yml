@@ -1,52 +1,74 @@
 version: "2.4"
 
 services:
-  # app:
-  #   build: docker/app
-  #   container_name: "${APP_SLUG:-laravel}-app"
-  #   image: clevyr/laravel
-  #   volumes:
-  #     - .:/app
-  #   working_dir: /app
-  #
-  # web:
-  #   build: docker/nginx
-  #   container_name: "${APP_SLUG:-laravel}-web"
-  #   image: clevyr/nginx
-  #   links:
-  #     - app
-  #   ports:
-  #     - 127.0.0.1:8000:80
-  #   volumes:
-  #     - .:/app
-  #   working_dir: /app
-  queue:
-    build: docker/app
-    command: php artisan queue:work --queue=high,default --tries=3
-    container_name: "${APP_SLUG:-laravel}-queue"
-    environment:
-      DB_HOST: "database"
-    image: clevyr/laravel
+  app:
+    build:
+      args:
+        NODE_ENV: development
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: "{{APP_NAME}}-app"
+    env_file:
+      - .env
+    image: clevyr/{{APP_NAME}}
+    restart: unless-stopped
     volumes:
-      - .:/app
-    working_dir: /app
+      - .:/var/www/html
+    working_dir: /var/www/html
+
+  proxy:
+    container_name: "{{APP_NAME}}-proxy"
+    image: clevyr/caddy
+    ports:
+      - 80:80
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - app
+
+  worker:
+    build:
+      args:
+        NODE_ENV: development
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["s6-svscan", "/etc/s6"]
+    container_name: "{{APP_NAME}}-worker"
+    env_file:
+      - .env
+    image: clevyr/{{APP_NAME}}
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    working_dir: /var/www/html
 
   database:
-    container_name: "${APP_SLUG:-laravel}-database"
+    container_name: "{{APP_NAME}}-database"
     environment:
-      POSTGRES_USER: "${DB_USERNAME}"
-      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_USER: "$DB_USERNAME"
+      POSTGRES_PASSWORD: "$DB_PASSWORD"
       POSTGRES_DB: "$DB_DATABASE"
     image: postgres:11.1-alpine
+    restart: unless-stopped
     ports:
       - 127.0.0.1:5432:5432
-    working_dir: /app
 
   test_database:
-    container_name: "${APP_SLUG:-laravel}-testing-database"
+    container_name: "{{APP_NAME}}-testing-database"
     environment:
-      POSTGRES_USER: "${DB_USERNAME}"
-      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_USER: "$DB_USERNAME"
+      POSTGRES_PASSWORD: "$DB_PASSWORD"
       POSTGRES_DB: "$DB_DATABASE"
     image: postgres:11.1-alpine
-    working_dir: /app
+    restart: unless-stopped
+
+  hot-reloader:
+    command: ["sh", "-c", "npm ci && npm run dev -- --watch --watch-poll"]
+    env_file:
+        - .env
+    image: node:lts-alpine
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    working_dir: /var/www/html

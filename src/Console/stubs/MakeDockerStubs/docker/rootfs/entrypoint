@@ -1,0 +1,14 @@
+#!/bin/sh
+set -ex
+
+if [ "$APP_ENV" != "local" ]; then
+    tar -xzf /usr/src/app.tar.gz
+
+    php artisan storage:link
+    php artisan config:cache
+    php artisan migrate
+fi
+
+php artisan migrate
+
+exec php-fpm

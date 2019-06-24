@@ -33,7 +33,13 @@ class MakeDockerCommand extends Command
     {
         $this->recursivelyCopy(
             __DIR__.'/stubs/MakeDockerStubs',
-            base_path()
+            base_path(),
+            function ($srcPath, $destPath) {
+                file_put_contents(
+                    $destPath,
+                    str_replace('{{APP_NAME}}', strtolower(env('APP_NAME', 'app')), file_get_contents($srcPath))
+                );
+            }
         );
 
         $this->info('Docker setup generated successfully.');
