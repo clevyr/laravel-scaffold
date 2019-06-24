@@ -7,7 +7,7 @@
 
                     <div class="card-body">
                         Before proceeding, please check your email for a verification link.
-                        If you did not receive the email, <a href="/verification/resend">click here to request another</a>.
+                        If you did not receive the email, <a href="/api/email/resend">click here to request another</a>.
                     </div>
                 </div>
             </div>

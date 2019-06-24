@@ -112,7 +112,7 @@ export default {
     data() {
         return {
             form: {
-                email: '',
+                email: this.$route.query.email || '',
                 password: '',
                 password_confirmation: '',
             },
