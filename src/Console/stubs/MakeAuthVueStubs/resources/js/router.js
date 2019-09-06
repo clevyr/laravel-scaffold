@@ -7,7 +7,7 @@ import Welcome from './views/Welcome.vue';
 import Home from './views/Home.vue';
 import Register from './views/auth/Register.vue';
 import Login from './views/auth/Login.vue';
-import Verify from './views/auth/Verify.vue';
+import ResendVerification from './views/auth/verification/Resend.vue';
 import PasswordEmail from './views/auth/passwords/Email.vue';
 import PasswordReset from './views/auth/passwords/Reset.vue';
 
@@ -58,7 +58,7 @@ const router = new VueRouter({
 
         {
             path: '/email/resend',
-            component: Verify,
+            component: ResendVerification,
             meta: {
                 auth: true,
                 notVerified: true,

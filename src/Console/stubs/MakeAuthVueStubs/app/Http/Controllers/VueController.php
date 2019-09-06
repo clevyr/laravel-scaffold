@@ -1,6 +1,6 @@
 <?php
 
-namespace {{namespace}}Http\Controllers;
+namespace App\Http\Controllers;
 
 class VueController extends Controller
 {

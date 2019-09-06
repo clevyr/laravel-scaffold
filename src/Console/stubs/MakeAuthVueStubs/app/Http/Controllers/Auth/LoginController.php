@@ -1,8 +1,8 @@
 <?php
 
-namespace {{namespace}}Http\Controllers\Auth;
+namespace App\Http\Controllers\Auth;
 
-use {{namespace}}Http\Controllers\Controller;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 

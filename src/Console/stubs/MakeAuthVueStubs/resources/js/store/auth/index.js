@@ -2,6 +2,7 @@ import register from './register';
 import login from './login';
 import logout from './logout';
 import passwords from './passwords';
+import verification from './verification';
 import refreshUser from './refreshUser';
 
 const isAuth = !!document.head.querySelector('meta[name="is-auth"]');
@@ -14,6 +15,7 @@ export default {
         login,
         logout,
         passwords,
+        verification,
         refreshUser,
     },
 

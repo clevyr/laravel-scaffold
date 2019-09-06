@@ -11,4 +11,4 @@
 |
 */
 
-Route::get('/{any}', 'VueController@index')->where('any', '^(?!api).*$');
+Route::get('/{any}', 'VueController@index')->where('any', '^(?!api).*$')->name('vue');
