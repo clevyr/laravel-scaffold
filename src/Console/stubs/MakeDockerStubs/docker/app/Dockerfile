@@ -59,7 +59,7 @@ RUN set -x \
     fi
 
 # Final Image
-FROM clevyr/laravel-base-image-builder
+FROM clevyr/laravel-base-image-builder:7.4
 
 WORKDIR /app
 VOLUME /app
