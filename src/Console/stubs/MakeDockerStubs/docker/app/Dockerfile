@@ -31,7 +31,7 @@ RUN set -x \
     && composer dump-autoload \
         --classmap-authoritative \
         --no-interaction \
-    && php artisan nova:publish \
+    # && php artisan nova:publish \
     && php artisan vendor:publish --tag=public
 
 # Frontend Builder
