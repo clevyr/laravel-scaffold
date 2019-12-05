@@ -39,6 +39,7 @@ class MakeDockerCommand extends Command
                     $destPath,
                     str_replace('{{APP_NAME}}', strtolower(env('APP_NAME', 'app')), file_get_contents($srcPath))
                 );
+                chmod($destPath, fileperms($srcPath));
             }
         );
 
@@ -53,6 +54,7 @@ class MakeDockerCommand extends Command
                     $destPath,
                     file_get_contents($srcPath)
                 );
+                chmod($destPath, fileperms($srcPath));
             };
         }
 

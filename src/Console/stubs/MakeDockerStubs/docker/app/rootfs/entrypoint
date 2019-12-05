@@ -7,7 +7,7 @@ if [ "$APP_ENV" != "local" ]; then
     php artisan config:cache
 else
     php artisan config:clear
-    php artisan nova:publish
+    # php artisan nova:publish
     php artisan vendor:publish --tag=public
 fi
 
