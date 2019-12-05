@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -eu
+
+npm ci
+exec npm run watch -- --no-progress
