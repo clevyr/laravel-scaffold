@@ -1,14 +1,33 @@
 #!/bin/sh
 set -ex
 
-if [ "$APP_ENV" != "local" ]; then
-    tar -xzf /usr/src/app.tar.gz
+cd /app
 
-    php artisan storage:link
+if [ "$APP_ENV" != "local" ]; then
     php artisan config:cache
-    php artisan migrate
+else
+    php artisan config:clear
+    php artisan nova:publish
+    php artisan vendor:publish --tag=public
 fi
 
-php artisan migrate
+if [ -L public/storage ]; then
+    rm public/storage
+fi
+php artisan storage:link
+
+set +x
+until PGPASSWORD="$DB_PASSWORD" psql -h"$DB_HOST" -U"$DB_USERNAME" "$DB_DATABASE" -c '\q' 2>/dev/null; do
+  echo "Waiting for Postgres" >&2
+  sleep 2
+done
+set -x
+
+if [ "$DB_FRESH_ON_START" = "true" ]; then
+    php artisan migrate:fresh
+    php artisan db:seed
+else
+    php artisan migrate --force
+fi
 
 exec php-fpm

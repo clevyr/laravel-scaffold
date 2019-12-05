@@ -1,11 +1,21 @@
+ARG INSTALL_BCMATH=true
+ARG INSTALL_EXIF=false
+ARG INSTALL_GD=false
+ARG INSTALL_IMAGICK=true
+ARG INSTALL_MOSQUITTO=false
+ARG INSTALL_PGSQL=true
+ARG INSTALL_REDIS=false
+ARG INSTALL_XDEBUG=false
+ARG INSTALL_ZIP=true
+
 # Backend Builder
 FROM clevyr/prestissimo as php-builder
 
 WORKDIR /app
 
 COPY composer.json composer.lock ./
-COPY nova/ nova/
-COPY nova-components/ nova-components/
+# COPY nova/ nova/
+# COPY nova-components/ nova-components/
 
 RUN set -x \
     && composer install \
@@ -17,9 +27,12 @@ RUN set -x \
 
 COPY . ./
 RUN set -x \
+    && export TELESCOPE_ENABLED=false \
     && composer dump-autoload \
         --classmap-authoritative \
-        --no-interaction
+        --no-interaction \
+    && php artisan nova:publish \
+    && php artisan vendor:publish --tag=public
 
 # Frontend Builder
 FROM node:lts-alpine as node-builder
@@ -27,7 +40,6 @@ FROM node:lts-alpine as node-builder
 WORKDIR /app
 
 COPY artisan package.json package-lock.json webpack.mix.js ./
-COPY nova-components/ nova-components/
 
 RUN set -x \
     && npm ci
@@ -36,68 +48,27 @@ COPY public/ public/
 COPY resources/ resources/
 
 ARG NODE_ENV=production
+ARG ENV=local
 
 RUN set -x \
-    && node_modules/webpack/bin/webpack.js \
-        --no-progress \
-        --hide-modules \
-        --config=node_modules/laravel-mix/setup/webpack.config.js
-
-# Packer
-FROM alpine as packer
-
-WORKDIR /app
-
-COPY --from=php-builder --chown=82:82 /app ./
-COPY --from=node-builder --chown=82:82 /app/public public/
-
-RUN set -x \
-    && tar -czf /app.tar.gz .
+    && if [ "$ENV" != "local" ]; then \
+        node_modules/webpack/bin/webpack.js \
+            --no-progress \
+            --hide-modules \
+            --config=node_modules/laravel-mix/setup/webpack.config.js; \
+    fi
 
 # Final Image
-FROM php:7.3-fpm-alpine
+FROM clevyr/laravel-base-image-builder
 
-WORKDIR /var/www/html
-VOLUME /var/www/html
+WORKDIR /app
+VOLUME /app
 
-RUN set -ex \
-    && apk add --virtual .build-deps \
-        freetype-dev \
-        libjpeg-turbo-dev \
-        libpng-dev \
-        libwebp-dev \
-        postgresql-dev \
-        $PHPIZE_DEPS \
-    && apk add \
-        fcgi \
-        freetype \
-        libjpeg-turbo \
-        libpng \
-        libwebp \
-        postgresql-libs \
-        s6 \
-    && docker-php-ext-configure gd \
-        --with-gd \
-        --with-freetype-dir=/usr/include/ \
-        --with-png-dir=/usr/include/ \
-        --with-jpeg-dir=/usr/include/ \
-        --with-webp-dir=/usr/include/ \
-    && docker-php-ext-install -j$(nproc) gd pgsql pdo_pgsql \
-    && apk del .build-deps \
-    && rm -rf /tmp/* /var/cache/apk/* \
-    && cd "$PHP_INI_DIR" \
-    && sed -ri \
-        -e 's/;(ping\.path)/\1/' \
-        ../php-fpm.d/www.conf \
-    && ln -s php.ini-production php.ini \
-    && sed -ri \
-        -e 's/^(expose_php).*$/\1 = Off/' \
-        php.ini-production
+COPY --chown=root docker/app/rootfs /
 
-COPY --from=packer /app.tar.gz /usr/src/app.tar.gz
-COPY --chown=root docker/rootfs /
+RUN crontab /etc/cron.d/scheduler
 
-RUN set -x \
-    && crontab /etc/cron.d/scheduler
+COPY --from=php-builder --chown=82:82 /app .
+COPY --from=node-builder --chown=82:82 /app/public public/
 
-CMD ["/entrypoint"]
+CMD ["s6-svscan", "/etc/s6/app"]

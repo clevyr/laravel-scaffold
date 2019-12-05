@@ -5,70 +5,72 @@ services:
     build:
       args:
         NODE_ENV: development
+        INSTALL_XDEBUG: '$XDEBUG'
       context: .
       dockerfile: docker/Dockerfile
-    container_name: "{{APP_NAME}}-app"
+    container_name: {{APP_NAME}}-app
     env_file:
       - .env
-    image: clevyr/{{APP_NAME}}
+    image: clevyr/{{APP_NAME}}/app
     restart: unless-stopped
     volumes:
-      - .:/var/www/html
-    working_dir: /var/www/html
-
-  proxy:
-    container_name: "{{APP_NAME}}-proxy"
-    image: clevyr/caddy
-    ports:
-      - 80:80
-    restart: unless-stopped
-    volumes:
-      - .:/var/www/html
-    depends_on:
-      - app
+      - .:/app:cached
 
   worker:
     build:
       args:
         NODE_ENV: development
+        INSTALL_XDEBUG: '$XDEBUG'
       context: .
-      dockerfile: docker/Dockerfile
-    command: ["s6-svscan", "/etc/s6"]
-    container_name: "{{APP_NAME}}-worker"
+      dockerfile: docker/app/Dockerfile
+    command: ["s6-svscan", "/etc/s6/worker"]
+    container_name: {{APP_NAME}}-worker
     env_file:
       - .env
-    image: clevyr/{{APP_NAME}}
+    image: clevyr/{{APP_NAME}}/app
     restart: unless-stopped
     volumes:
-      - .:/var/www/html
-    working_dir: /var/www/html
+      - .:/app:cached
+
+  proxy:
+    container_name: {{APP_NAME}}-proxy
+    environment:
+      REVERSE_PROXY: "true"
+      APP_HOST: "app"
+      APP_PORT: "80"
+    depends_on:
+      - app
+    image: clevyr/caddy
+    ports:
+      - 80:80
+    restart: unless-stopped
 
   database:
-    container_name: "{{APP_NAME}}-database"
+    container_name: {{APP_NAME}}-database
     environment:
       POSTGRES_USER: "$DB_USERNAME"
       POSTGRES_PASSWORD: "$DB_PASSWORD"
       POSTGRES_DB: "$DB_DATABASE"
     image: postgres:11.1-alpine
-    restart: unless-stopped
     ports:
       - 127.0.0.1:5432:5432
-
-  test_database:
-    container_name: "{{APP_NAME}}-testing-database"
-    environment:
-      POSTGRES_USER: "$DB_USERNAME"
-      POSTGRES_PASSWORD: "$DB_PASSWORD"
-      POSTGRES_DB: "$DB_DATABASE"
-    image: postgres:11.1-alpine
-    restart: unless-stopped
-
-  hot-reloader:
-    command: ["sh", "-c", "npm ci && npm run dev -- --watch --watch-poll"]
-    env_file:
-        - .env
-    image: node:lts-alpine
     restart: unless-stopped
     volumes:
-      - .:/var/www/html
-    working_dir: /var/www/html
+      - database:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+
+  hot:
+    build: docker/hot
+    container_name: {{APP_NAME}}-hot
+    env_file:
+        - .env
+    image: clevyr/{{APP_NAME}}/hot-reloader
+    restart: unless-stopped
+    volumes:
+      - .:/app:cached
+
+volumes:
+  database:
