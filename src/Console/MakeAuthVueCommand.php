@@ -7,7 +7,7 @@ use Illuminate\Console\DetectsApplicationNamespace;
 
 class MakeAuthVueCommand extends Command
 {
-    use DetectsApplicationNamespace;
+    // use DetectsApplicationNamespace;
 
     /**
      * The name and signature of the console command.
