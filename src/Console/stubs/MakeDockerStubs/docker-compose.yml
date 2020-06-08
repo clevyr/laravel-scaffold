@@ -5,24 +5,20 @@ services:
     build:
       args:
         NODE_ENV: development
-        INSTALL_XDEBUG: '$XDEBUG'
+        INSTALL_XDEBUG: "true"
       context: .
       dockerfile: docker/app/Dockerfile
     container_name: {{APP_NAME}}-app
     env_file:
       - .env
     image: clevyr/{{APP_NAME}}/app
+    ports:
+      - 80:80
     restart: unless-stopped
     volumes:
       - .:/app:cached
 
   worker:
-    build:
-      args:
-        NODE_ENV: development
-        INSTALL_XDEBUG: '$XDEBUG'
-      context: .
-      dockerfile: docker/app/Dockerfile
     command: ["s6-svscan", "/etc/s6/worker"]
     container_name: {{APP_NAME}}-worker
     env_file:
@@ -31,19 +27,6 @@ services:
     restart: unless-stopped
     volumes:
       - .:/app:cached
-
-  proxy:
-    container_name: {{APP_NAME}}-proxy
-    environment:
-      REVERSE_PROXY: "true"
-      APP_HOST: "app"
-      APP_PORT: "80"
-    depends_on:
-      - app
-    image: clevyr/caddy
-    ports:
-      - 80:80
-    restart: unless-stopped
 
   database:
     container_name: {{APP_NAME}}-database
